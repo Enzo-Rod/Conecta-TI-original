@@ -5,10 +5,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-/**
- * Configuração global de CORS.
- * Permite que aplicações front-end consumam a API.
- */
 @Configuration
 public class CorsConfig {
 
@@ -20,17 +16,15 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
 
                 registry.addMapping("/**")
-                        // Desenvolvimento + produção
-                        .allowedOrigins(
+                        .allowedOriginPatterns(
                                 "http://localhost:3000",
                                 "http://127.0.0.1:3000",
                                 "http://localhost:5500",
                                 "http://127.0.0.1:5500",
                                 "http://localhost:5173",
                                 "http://127.0.0.1:5173",
-                                "https://conecta-ti-senac.vercel.app"
+                                "https://*.vercel.app"
                         )
-
                         .allowedMethods(
                                 "GET",
                                 "POST",
@@ -39,9 +33,7 @@ public class CorsConfig {
                                 "PATCH",
                                 "OPTIONS"
                         )
-
                         .allowedHeaders("*")
-
                         .allowCredentials(true);
             }
         };
