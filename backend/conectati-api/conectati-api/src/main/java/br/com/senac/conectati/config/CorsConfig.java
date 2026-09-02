@@ -20,10 +20,17 @@ public class CorsConfig {
             public void addCorsMappings(CorsRegistry registry) {
 
                 registry.addMapping("/**")
-                        // Durante o desenvolvimento
-                        .allowedOrigins("http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5500", "http://127.0.0.1:5500", "http://localhost:5173", "http://127.0.0.1:5173")
+                        // Desenvolvimento + produção
+                        .allowedOrigins(
+                                "http://localhost:3000",
+                                "http://127.0.0.1:3000",
+                                "http://localhost:5500",
+                                "http://127.0.0.1:5500",
+                                "http://localhost:5173",
+                                "http://127.0.0.1:5173",
+                                "https://conecta-ti-senac.vercel.app"
+                        )
 
-                        // Métodos HTTP permitidos
                         .allowedMethods(
                                 "GET",
                                 "POST",
@@ -33,10 +40,8 @@ public class CorsConfig {
                                 "OPTIONS"
                         )
 
-                        // Todos os headers
                         .allowedHeaders("*")
 
-                        // Permite envio de cookies/token
                         .allowCredentials(true);
             }
         };
