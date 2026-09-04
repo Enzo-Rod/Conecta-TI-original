@@ -11,6 +11,8 @@ import br.com.senac.conectati.repository.EquipamentoRepository;
 import br.com.senac.conectati.repository.LaboratorioRepository;
 import br.com.senac.conectati.repository.SalaRepository;
 import br.com.senac.conectati.repository.UsuarioRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +24,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Profile("!test")
 public class DemoDataInitializer {
 
+    private static final Logger log = LoggerFactory.getLogger(DemoDataInitializer.class);
+
     @Bean
     ApplicationRunner seedDemoData(
             UsuarioRepository usuarios,
@@ -32,13 +36,18 @@ public class DemoDataInitializer {
             JdbcTemplate jdbcTemplate,
             PasswordEncoder passwordEncoder) {
         return args -> {
+            log.info(">>> [seedDemoData] Iniciando migrarEnumsLegados");
             migrarEnumsLegados(jdbcTemplate);
+            log.info(">>> [seedDemoData] Terminou migrarEnumsLegados");
 
+            log.info(">>> [seedDemoData] Criando usuarios demo");
             criarUsuarioDemo(usuarios, passwordEncoder, "Administrador", "admin@conectati.local", "Admin@123", TipoUsuario.ADMINISTRADOR);
             criarUsuarioDemo(usuarios, passwordEncoder, "Instrutor de Demonstracao", "instrutor@conectati.local", "Instrutor@123", TipoUsuario.INSTRUTOR);
             criarUsuarioDemo(usuarios, passwordEncoder, "Tecnico de Demonstracao", "tecnico@conectati.local", "Tecnico@123", TipoUsuario.TECNICO);
             criarUsuarioDemo(usuarios, passwordEncoder, "Coordenador de Demonstracao", "coordenador@conectati.local", "Coordenador@123", TipoUsuario.COORDENADOR);
+            log.info(">>> [seedDemoData] Terminou criacao de usuarios");
 
+            log.info(">>> [seedDemoData] Verificando categoria");
             Categoria categoria = categorias.findByNomeIgnoreCase("Informatica").orElseGet(() -> {
                 Categoria item = new Categoria();
                 item.setNome("Informatica");
@@ -46,6 +55,7 @@ public class DemoDataInitializer {
                 return categorias.save(item);
             });
 
+            log.info(">>> [seedDemoData] Verificando laboratorio");
             Laboratorio laboratorio = laboratorios.findByNomeIgnoreCase("Laboratorio de Informatica").orElseGet(() -> {
                 Laboratorio item = new Laboratorio();
                 item.setNome("Laboratorio de Informatica");
@@ -54,6 +64,7 @@ public class DemoDataInitializer {
                 return laboratorios.save(item);
             });
 
+            log.info(">>> [seedDemoData] Verificando sala");
             Sala sala = salas.findByNomeIgnoreCase("Laboratorio 01").orElseGet(() -> {
                 Sala item = new Sala();
                 item.setNome("Laboratorio 01");
@@ -62,6 +73,7 @@ public class DemoDataInitializer {
                 return salas.save(item);
             });
 
+            log.info(">>> [seedDemoData] Verificando equipamento");
             if (!equipamentos.existsByPatrimonio("SENAC-001")) {
                 Equipamento equipamento = new Equipamento();
                 equipamento.setNome("Notebook de suporte");
@@ -73,6 +85,8 @@ public class DemoDataInitializer {
                 equipamento.setCategoria(categoria);
                 equipamentos.save(equipamento);
             }
+
+            log.info(">>> [seedDemoData] Finalizado com sucesso");
         };
     }
 
@@ -89,6 +103,7 @@ public class DemoDataInitializer {
     }
 
     private void migrarEnumsLegados(JdbcTemplate jdbcTemplate) {
+        jdbcTemplate.setQueryTimeout(10);
         jdbcTemplate.update("update usuarios set tipo = 'ADMINISTRADOR' where tipo = 'ADMIN'");
         jdbcTemplate.update("update usuarios set tipo = 'INSTRUTOR' where tipo in ('PROFESSOR', 'ALUNO')");
         jdbcTemplate.update("update chamados set status = 'CONCLUIDO' where status = 'FINALIZADO'");
